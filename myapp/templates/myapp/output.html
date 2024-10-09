@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Output Page</title>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/generate/');
+
+        socket.onopen = function() {
+            console.log("WebSocket connection established.");
+            // Optionally send the input ID to the server to start processing
+            socket.send(JSON.stringify({ 'input_string': '{{ input_id }}' }));
+        };
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'instant_result') {
+                document.getElementById('instantResult').innerText = data.result;
+            } else if (data.type === 'late_result') {
+                const lateDiv = document.getElementById('lateResult');
+                lateDiv.innerHTML += `<p>${data.result}</p>`;
+            }
+        };
+
+        socket.onclose = function(event) {
+            console.log('WebSocket connection closed:', event);
+        };
+    </script>
+</head>
+<body>
+    <h1>Results</h1>
+    <div id="instantResult"></div>
+    <div id="lateResult"></div>
+</body>
+</html>
